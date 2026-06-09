@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz: Ortografia & Combate ao Bullying</title>
+    <style>
+        :root {
+            --primary: #4a90e2;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #e9ecef;
+            color: var(--dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 650px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .intro-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #666;
+            margin-bottom: 20px;
+            text-align: justify;
+            background: var(--light);
+            padding: 15px;
+            border-left: 4px solid var(--primary);
+            border-radius: 4px;
+        }
+
+        .progress {
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .question-box {
+            font-size: 18px;
+            margin-bottom: 25px;
+            font-weight: 600;
+            min-height: 50px;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            background: var(--light);
+            border: 2px solid #dee2e6;
+            padding: 15px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .btn:hover {
+            background: #e2e8f0;
+            border-color: #cbd5e1;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .keyboard-tip {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+        }
+
+        /* Tela de Vitória e Câmera */
+        .hidden {
+            display: none !important;
+        }
+
+        #camera-section {
+            margin-top: 20px;
+            background: var(--light);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        video {
+            width: 100%;
+            max-width: 320px;
+            border-radius: 8px;
+            background: #000;
+            transform: scaleX(-1); /* Efeito espelho */
+        }
+
+        canvas {
+            display: none;
+        }
+
+        #snap-btn {
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        /* Placar dos Pro Players */
+        .leaderboard {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .leaderboard h2 {
+            font-size: 20px;
+            color: var(--dark);
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .player-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        @media (max-width: 480px) {
+            .player-list {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .player-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--light);
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .player-card img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+        }
+
+        .player-info h4 {
+            font-size: 14px;
+            color: var(--dark);
+        }
+
+        .player-info span {
+            font-size: 11px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>QUIZ – Ortografia & Conscientização</h1>
+        
+        <div id="intro" class="intro-text">
+            O bullying é uma forma de violência que ocorre quando uma pessoa ou grupo pratica atitudes repetitivas de humilhação, intimidação ou exclusão contra alguém. Esse comportamento causa danos emocionais graves. Combater o bullying exige respeito, empatia e responsabilidade coletiva.
+        </div>
+
+        <div id="quiz-screen">
+            <div class="progress" id="progress">Questão: 1 / 20</div>
+            <div class="question-box" id="question">Carregando...</div>
+            
+            <div class="options-container">
+                <button class="btn" id="opt1" onclick="selectOption(1)">1 - Opção A</button>
+                <button class="btn" id="opt2" onclick="selectOption(2)">2 - Opção B</button>
+            </div>
+            <p class="keyboard-tip">Você também pode responder pressionando as teclas <b>1</b> ou <b>2</b> no teclado.</p>
+        </div>
+
+        <div id="victory-screen" class="hidden">
+            <h2 style="color: var(--success); margin-bottom: 10px;">🏆 Você Venceu!</h2>
+            <p>Sua ortografia está afiada e você sabe tudo sobre combater o bullying!</p>
+            
+            <div id="camera-section">
+                <h3>Sorria para a foto do Campeão!</h3>
+                <video id="video" autoplay playsinline></video>
+                <button id="snap-btn" onclick="takePhoto()">Tirar Foto e Salvar</button>
+                <canvas id="canvas" width="320" height="240"></canvas>
+            </div>
+        </div>
+
+        <div class="leaderboard">
+            <h2>🥇 Últimos Pró Players</h2>
+            <div class="player-list" id="leaderboard-list">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // Banco de dados das questões conforme o gabarito fornecido
+        const allQuestions = [
+            { text: "O ____ deve ser combatido na escola e fora dela.", options: ["bullying", "bullyng"], correct: 1 },
+            { text: "O ____ é essencial para uma boa convivência.", options: ["respeito", "respeyto"], correct: 1 },
+            { text: "A ____ entre colegas torna o ambiente mais acolhedor.", options: ["amizade", "amisade"], correct: 1 },
+            { text: "O ____ pode machucar emocionalmente uma pessoa.", options: ["bullying", "bulin"], correct: 1 },
+            { text: "A ____ é importante para aceitar as diferenças.", options: ["diversidade", "divercidade"], correct: 1 },
+            { text: "A ____ não deve ser tolerated no ambiente escolar.", options: ["violência", "violensia"], correct: 1 },
+            { text: "A ____ ajuda a compreender os sentimentos do outro.", options: ["empatia", "enpatia"], correct: 1 },
+            { text: "A ____ é fundamental para viver em grupo.", options: ["convivência", "convivensia"], correct: 1 },
+            { text: "A ____ deve ser denunciada sempre.", options: ["discriminação", "discriminassão"], correct: 1 },
+            { text: "O ____ também pode acontecer nas redes sociais.", options: ["cyberbullying", "cyberbuling"], correct: 1 },
+            { text: "A ____ promove o respeito às diferenças.", options: ["inclusão", "enclusão"], correct: 1 },
+            { text: "A ____ pode causar danos psicológicos.", options: ["humilhação", "umilhação"], correct: 1 },
+            { text: "A ____ entre colegas deve ser incentivada na escola.", options: ["solidariedade", "solidareidade"], correct: 1 },
+            { text: "A ____ é necessária para assumir atitudes corretas.", options: ["responsabilidade", "responsabelidade"], correct: 1 },
+            { text: "A ____ pode ser prejudicada por situações de bullying.", options: ["autoestima", "auto-estima"], correct: 1 },
+            { text: "A ____ precisa ser combatida em todas as suas formas.", options: ["opressão", "opreção"], correct: 1 },
+            { text: "A ____ é essencial para um ambiente escolar saudável.", options: ["conscientização", "conscientizassão"], correct: 1 },
+            { text: "A ____ ajuda a construir relações mais justas.", options: ["resistência", "rezistência"], correct: 1 },
+            { text: "A ____ das atitudes é importante para evitar conflitos.", options: ["consequência", "consequensia"], correct: 1 },
+            { text: "O ____ deve prevalecer em todas as relações humanas.", options: ["respeito", "rezpeito"], correct: 1 }
+        ];
+
+        let shuffledQuestions = [];
+        let currentQuestionIndex = 0;
+        let streamRef = null;
+
+        // Inicializa o jogo
+        function startGame() {
+            // Embaralha a ordem das questões
+            shuffledQuestions = [...allQuestions].sort(() => Math.random() - 0.5);
+            currentQuestionIndex = 0;
+            
+            document.getElementById("quiz-screen").classList.remove("hidden");
+            document.getElementById("victory-screen").classList.add("hidden");
+            document.getElementById("intro").classList.remove("hidden");
+            
+            stopCamera();
+            loadQuestion();
+        }
+
+        // Carrega a questão atual na tela
+        function loadQuestion() {
+            if (currentQuestionIndex >= shuffledQuestions.length) {
+                winGame();
+                return;
+            }
+
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            document.getElementById("progress").innerText = `Questão: ${currentQuestionIndex + 1} / ${shuffledQuestions.length}`;
+            document.getElementById("question").innerText = currentQuestion.text;
+
+            // Define os botões obedecendo a formatação "1 - opção" e "2 - opção"
+            document.getElementById("opt1").innerText = `1 - ${currentQuestion.options[0]}`;
+            document.getElementById("opt2").innerText = `2 - ${currentQuestion.options[1]}`;
+        }
+
+        // Valida a opção selecionada (via clique ou teclado)
+        function selectOption(selectedIdx) {
+            // Proteção caso o jogo já tenha terminado
+            if (currentQuestionIndex >= shuffledQuestions.length) return;
+
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            
+            if (selectedIdx === currentQuestion.correct) {
+                // Acertou, avança
+                currentQuestionIndex++;
+                loadQuestion();
+            } else {
+                // Errou uma vez, reinicia tudo do zero
+                alert("Resposta Incorreta! O jogo será reiniciado para você tentar a pontuação perfeita.");
+                startGame();
+            }
+        }
+
+        // Captura eventos do teclado (Teclas 1 e 2)
+        window.addEventListener("keydown", function(event) {
+            if (document.getElementById("quiz-screen").classList.contains("hidden")) return;
+            
+            if (event.key === "1") {
+                selectOption(1);
+            } else if (event.key === "2") {
+                selectOption(2);
+            }
+        });
+
+        // Fluxo de vitória e abertura da câmera
+        function winGame() {
+            document.getElementById("quiz-screen").classList.add("hidden");
+            document.getElementById("intro").classList.add("hidden");
+            document.getElementById("victory-screen").classList.remove("hidden");
+
+            // Liga a Câmera do Usuário
+            navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } })
+                .then(stream => {
+                    const video = document.getElementById("video");
+                    video.srcObject = stream;
+                    streamRef = stream;
+                })
+                .catch(err => {
+                    console.error("Erro ao acessar a câmera: ", err);
+                    alert("Não foi possível acessar a câmera, mas você pode salvar seu nome no ranking!");
+                    // Se não tiver câmera, esconde a seção de vídeo mas deixa salvar
+                    document.getElementById("camera-section").innerHTML = `
+                        <button id="snap-btn" onclick="takePhotoWithoutCamera()">Registrar no Ranking</button>
+                    `;
+                });
+        }
+
+        function stopCamera() {
+            if (streamRef) {
+                streamRef.getTracks().forEach(track => track.stop());
+                streamRef = null;
+            }
+        }
+
+        // Tira a foto e adiciona na lista
+        function takePhoto() {
+            const video = document.getElementById("video");
+            const canvas = document.getElementById("canvas");
+            const ctx = canvas.getContext("2d");
+
+            // Desenha a imagem espelhada no canvas para ficar natural
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            ctx.setTransform(1, 0, 0, 1, 0, 0); // reseta matriz
+
+            const dataURL = canvas.toDataURL("image/png");
+            saveToLeaderboard(dataURL);
+        }
+
+        function takePhotoWithoutCamera() {
+            // Imagem padrão caso dê erro ou não possua câmera
+            const defaultAvatar = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='%234a90e2'/><text x='50%' y='65%' font-family='sans-serif' font-size='12' fill='white' text-anchor='middle'>🏆</text></svg>";
+            saveToLeaderboard(defaultAvatar);
+        }
+
+        function saveToLeaderboard(imageData) {
+            const name = prompt("Digite seu nome ou apelido para o Hall da Fama:") || "Anônimo";
+            
+            const players = JSON.parse(localStorage.getItem("quiz_pro_players")) || [];
+            
+            const newPlayer = {
+                name: name,
+                photo: imageData,
+                date: new Date().toLocaleDateString('pt-BR')
+            };
+
+            // Adiciona no início da lista
+            players.unshift(newPlayer);
+            
+            // Mantém apenas o espaço dos 10 últimos campeões
+            if (players.length > 10) {
+                players.pop();
+            }
+
+            localStorage.setItem("quiz_pro_players", JSON.stringify(players));
+            renderLeaderboard();
+            
+            alert("Registrado com sucesso!");
+            startGame(); // Reinicia para um novo jogador
+        }
+
+        // Renderiza a lista de Pro Players na tela
+        function renderLeaderboard() {
+            const listContainer = document.getElementById("leaderboard-list");
+            const players = JSON.parse(localStorage.getItem("quiz_pro_players")) || [];
+
+            listContainer.innerHTML = "";
+
+            if (players.length === 0) {
+                listContainer.innerHTML = "<p style='grid-column: span 2; text-align:center; color: #888;'>Nenhum recordista ainda. Seja o primeiro!</p>";
+                return;
+            }
+
+            players.forEach(player => {
+                const card = document.createElement("div");
+                card.className = "player-card";
+                card.innerHTML = `
+                    <img src="${player.photo}" alt="Foto de ${player.name}">
+                    <div class="player-info">
+                        <h4>${player.name}</h4>
+                        <span>Campeão em ${player.date}</span>
+                    </div>
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        // Inicialização ao carregar a página
+        window.onload = function() {
+            startGame();
+            renderLeaderboard();
+        };
+    </script>
+</body>
+</html>
