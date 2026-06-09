@@ -17,9 +17,10 @@
                 <p>O bullying é uma forma de violência com atitudes repetitivas de humilhação, intimidação ou exclusão. Combater isso exige respeito, empatia e responsabilidade coletiva. Mostre que você é fera na ortografia e contra o bullying!</p>
             </div>
 
-            <button id="start-btn" class="btn-primary pulse" onclick="startGame()">
-                Iniciar Ortografia em Jogo
-            </button>
+            <div class="start-action-box">
+                <span class="key-indicator large">1</span>
+                <span class="action-text">Iniciar Ortografia em Jogo</span>
+            </div>
         </div>
     </div>
 
@@ -36,17 +37,17 @@
             <div class="question-box" id="question-text">Carregando pergunta...</div>
             
             <div class="options-grid">
-                <button class="option-card" id="opt1" onclick="selectOption(1)">
+                <div class="option-card" id="opt1">
                     <span class="key-indicator">1</span>
                     <span class="opt-text" id="opt1-text">Opção 1</span>
-                </button>
-                <button class="option-card" id="opt2" onclick="selectOption(2)">
+                </div>
+                <div class="option-card" id="opt2">
                     <span class="key-indicator">2</span>
                     <span class="opt-text" id="opt2-text">Opção 2</span>
-                </button>
+                </div>
             </div>
 
-            <p class="tip-text">Pressione as teclas [1] ou [2] do teclado para responder rápido!</p>
+            <p class="tip-text">Pressione as teclas [1] ou [2] do teclado para responder!</p>
         </div>
     </div>
 
@@ -63,7 +64,7 @@
 
             <div id="pose-instruction">
                 <p class="neon-text-gold">PREPARE SUA POSE DE PRO PLAYER!</p>
-                <button id="photo-btn" class="btn-primary" onclick="startPhotoFlow()">Tirar Foto Oficial</button>
+                <p class="sub-pose-text">A foto será tirada automaticamente em instantes...</p>
             </div>
         </div>
     </div>

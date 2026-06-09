@@ -53,7 +53,7 @@ body {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
 }
 
-/* Textos e Estilização Gamer */
+/* Textos Gamer */
 .neon-text {
     font-size: 2.5rem;
     color: #fff;
@@ -72,7 +72,7 @@ body {
     color: var(--neon-gold);
     font-weight: bold;
     text-shadow: 0 0 5px rgba(251, 191, 36, 0.5);
-    margin-bottom: 15px;
+    margin-bottom: 5px;
     letter-spacing: 1px;
 }
 
@@ -93,23 +93,22 @@ body {
     margin-bottom: 30px;
 }
 
-/* Botões */
-.btn-primary {
-    background: linear-gradient(135deg, #2563eb, #3b82f6);
-    color: white;
-    border: none;
-    padding: 16px 32px;
-    font-size: 1.2rem;
-    font-weight: bold;
+/* Caixa de Ação Teclado Numérico (Iniciar) */
+.start-action-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 20px;
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+    padding: 16px 36px;
     border-radius: 50px;
-    cursor: pointer;
-    box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
-    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.6);
+    animation: pulseBtn 2s infinite;
 }
 
-.btn-primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 0 25px var(--neon-blue);
+.action-text {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: white;
 }
 
 /* Componentes do Jogo */
@@ -157,7 +156,7 @@ body {
     line-height: 1.5;
 }
 
-/* Opções (Cartões de Jogo) */
+/* Opções de Cartões de Jogo */
 .options-grid {
     display: flex;
     flex-direction: column;
@@ -172,35 +171,41 @@ body {
     padding: 18px;
     display: flex;
     align-items: center;
-    cursor: pointer;
-    transition: all 0.2s ease;
     text-align: left;
     color: white;
-}
-
-.option-card:hover {
-    background: rgba(51, 65, 85, 0.8);
-    border-color: var(--neon-blue);
-    transform: scale(1.02);
 }
 
 .key-indicator {
     background: var(--neon-blue);
     color: var(--bg-dark);
     font-weight: bold;
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-right: 15px;
+    font-size: 1.1rem;
+}
+
+.key-indicator.large {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    font-size: 1.4rem;
+    background: var(--neon-gold);
+}
+
+.opt-text {
+    font-size: 1.2rem;
+    font-weight: 500;
 }
 
 .tip-text {
     font-size: 0.8rem;
     color: #94a3b8;
-    margin-top: 20px;
+    margin-top: 25px;
 }
 
 /* Câmera e Foto */
@@ -241,7 +246,12 @@ canvas {
     z-index: 10;
 }
 
-/* Seção de Líderes / Pró Players */
+.sub-pose-text {
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+/* Seção do Ranking */
 #leaderboard-section {
     width: 100%;
     max-width: 700px;
@@ -299,18 +309,14 @@ canvas {
 
 @keyframes pulseScale {
     0% { transform: scale(1); opacity: 0.9; }
-    50% { transform: scale(1.2); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 1; }
     100% { transform: scale(1); opacity: 0.9; }
 }
 
-.pulse {
-    animation: pulseBtn 2s infinite;
-}
-
 @keyframes pulseBtn {
-    0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
-    70% { box-shadow: 0 0 0 15px rgba(59, 130, 246, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+    0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(37, 99, 235, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0); }
 }
 
 @media (max-width: 500px) {
