@@ -1,4 +1,4 @@
-// Base de Dados Oficial das Questões e Níveis
+// Banco de dados imutável do Quiz escolar
 const quizDatabase = [
     { text: "O ____ deve ser combatido na escola e fora dela.", options: ["bullying", "bullyng"], correct: "bullying", level: "Nível Básico" },
     { text: "O ____ é essencial para uma boa convivência.", options: ["respeito", "respeyto"], correct: "respeito", level: "Nível Básico" },
@@ -25,11 +25,35 @@ const quizDatabase = [
 let gameQuestions = [];
 let currentQuestionIdx = 0;
 let webcamStream = null;
-let currentRenderedOptions = []; // Armazena a ordem embaralhada da pergunta atual
+let currentRenderedOptions = [];
+let executionState = "INTRO"; // INTRO, PLAYING, GAMEOVER, VICTORY
 
-// Inicializa o jogo e embaralha as perguntas
+// Paletas cromáticas para alternar dinamicamente o fundo
+const bgPalettes = [
+    "linear-gradient(135deg, rgba(0, 210, 255, 0.2), rgba(157, 78, 221, 0.2))",
+    "linear-gradient(135deg, rgba(255, 0, 127, 0.2), rgba(255, 107, 53, 0.2))",
+    "linear-gradient(135deg, rgba(0, 255, 135, 0.2), rgba(0, 210, 255, 0.2))",
+    "linear-gradient(135deg, rgba(157, 78, 221, 0.2), rgba(255, 51, 51, 0.2))"
+];
+
+// Altera a cor e velocidade dos elementos ao fundo do jogo
+function mutateBackgroundBackground() {
+    const cubes = document.querySelectorAll(".cube");
+    const chosenPalette = bgPalettes[Math.floor(Math.random() * bgPalettes.length)];
+    
+    cubes.forEach(cube => {
+        cube.style.background = chosenPalette;
+        // Altera levemente a velocidade para gerar dinamismo físico
+        cube.style.animationDuration = `${Math.floor(Math.random() * 8) + 8}s`;
+    });
+}
+
+// Inicializa a engine do quiz
 function startGame() {
+    executionState = "PLAYING";
     document.getElementById("loading-screen").classList.add("hidden");
+    document.getElementById("gameover-screen").classList.add("hidden");
+    document.getElementById("victory-screen").classList.add("hidden");
     document.getElementById("quiz-screen").classList.remove("hidden");
     document.getElementById("leaderboard-section").classList.remove("hidden");
     
@@ -40,12 +64,20 @@ function startGame() {
     loadNextQuestion();
 }
 
-// Prepara e exibe a pergunta
+// Renderiza a pergunta vigente com transição CSS aplicada ao elemento-mãe
 function loadNextQuestion() {
+    mutateBackgroundBackground();
+    
     if (currentQuestionIdx >= gameQuestions.length) {
         triggerVictoryFlow();
         return;
     }
+
+    const quizCard = document.getElementById("quiz-card");
+    // Reseta classe de animação para forçar re-gatilho de transição
+    quizCard.classList.remove("screen-change");
+    void quizCard.offsetWidth; 
+    quizCard.classList.add("screen-change");
 
     const currentQ = gameQuestions[currentQuestionIdx];
     
@@ -54,72 +86,89 @@ function loadNextQuestion() {
     
     const percentage = (currentQuestionIdx / gameQuestions.length) * 100;
     document.getElementById("progress-fill").style.width = `${percentage}%`;
-    
     document.getElementById("question-text").innerText = currentQ.text;
     
-    // EMBARALHA AS RESPOSTAS DA QUESTÃO (Evita que a certa fique sempre no mesmo botão)
     currentRenderedOptions = [...currentQ.options].sort(() => Math.random() - 0.5);
-    
-    // Renderiza nos cartões SEM colocar números fixos na string (apenas o indicador visual nativo)
     document.getElementById("opt1-text").innerText = currentRenderedOptions[0];
     document.getElementById("opt2-text").innerText = currentRenderedOptions[1];
 }
 
-// Avalia a entrada do teclado
-function handleInput(keyNumber) {
-    const isIntroActive = !document.getElementById("loading-screen").classList.contains("hidden");
-    const isQuizActive = !document.getElementById("quiz-screen").classList.contains("hidden");
-
-    // Tela Inicial: Se apertar 1, inicia o jogo
-    if (isIntroActive && keyNumber === 1) {
+// Processa escolhas analíticas feitas pelo teclado
+function evaluateInput(keyNumber) {
+    if (executionState === "INTRO" && keyNumber === 1) {
         startGame();
         return;
     }
 
-    // Tela do Jogo: Processa alternativas 1 e 2
-    if (isQuizActive && (keyNumber === 1 || keyNumber === 2)) {
+    if (executionState === "PLAYING" && (keyNumber === 1 || keyNumber === 2)) {
         if (currentQuestionIdx >= gameQuestions.length) return;
 
         const currentQ = gameQuestions[currentQuestionIdx];
-        const selectedAnswerText = currentRenderedOptions[keyNumber - 1]; // Pega a string selecionada
+        const selectedAnswerText = currentRenderedOptions[keyNumber - 1];
 
         if (selectedAnswerText === currentQ.correct) {
             currentQuestionIdx++;
             loadNextQuestion();
         } else {
-            alert("Resposta incorreta! O desafio foi reiniciado.");
-            startGame();
+            triggerDefeatFlow();
         }
     }
 }
 
-// Capturador global de teclado físico / teclado numérico
+// EventListener global
 window.addEventListener("keydown", (e) => {
-    if (e.key === "1") handleInput(1);
-    if (e.key === "2") handleInput(2);
+    if (e.key === "1") evaluateInput(1);
+    if (e.key === "2") evaluateInput(2);
 });
+
+/* Fluxo de Derrota - Sem interrupções por pop-ups nativos */
+function triggerDefeatFlow() {
+    executionState = "GAMEOVER";
+    mutateBackgroundBackground();
+    
+    document.getElementById("quiz-screen").classList.add("hidden");
+    document.getElementById("leaderboard-section").classList.add("hidden");
+    document.getElementById("gameover-screen").classList.remove("hidden");
+    
+    // Constrói o espelho do ranking em tamanho estendido dentro da div correspondente
+    displayLeaderboard("leaderboard-list-defeat");
+
+    const cooldownFill = document.getElementById("defeat-cooldown");
+    cooldownFill.style.transition = "none";
+    cooldownFill.style.width = "100%";
+    
+    // Inicia encolhimento progressivo da barra durante os 5s
+    setTimeout(() => {
+        cooldownFill.style.transition = "width 5s linear";
+        cooldownFill.style.width = "0%";
+    }, 50);
+
+    // Retorna automaticamente após o término do timer
+    setTimeout(() => {
+        if (executionState === "GAMEOVER") {
+            returnToMenu();
+        }
+    }, 5050);
+}
 
 /* Fluxo de Vitória Automático */
 function triggerVictoryFlow() {
+    executionState = "VICTORY";
     document.getElementById("quiz-screen").classList.add("hidden");
     document.getElementById("victory-screen").classList.remove("hidden");
-    document.getElementById("progress-fill").style.width = `100%`;
 
-    // Liga a câmera
     navigator.mediaDevices.getUserMedia({ video: { width: 320, height: 240 } })
         .then(stream => {
             document.getElementById("webcam").srcObject = stream;
             webcamStream = stream;
-            startAutomaticCountdown(); // Começa a contar sozinho assim que a câmera ativa
+            startAutomaticCountdown();
         })
-        .catch(err => {
-            console.warn("Câmera ausente: ", err);
-            // Salva sem foto de forma direta após 3 segundos
-            setTimeout(() => { saveAutomatedWinner(null); }, 3000);
+        .catch(() => {
+            // Se o hardware de vídeo falhar, avança direto de forma segura sem quebrar
+            setTimeout(() => { saveAutomatedWinner(null); }, 4000);
         });
 }
 
-// Contagem regressiva automatizada de 5s
 function startAutomaticCountdown() {
     const overlay = document.getElementById("countdown-overlay");
     overlay.classList.remove("hidden");
@@ -134,12 +183,11 @@ function startAutomaticCountdown() {
         } else {
             clearInterval(interval);
             overlay.classList.add("hidden");
-            captureFinalSnapshot(); // Tira a foto instantaneamente ao chegar no 0
+            captureFinalSnapshot();
         }
     }, 1000);
 }
 
-// Captura do Canvas
 function captureFinalSnapshot() {
     const video = document.getElementById("webcam");
     const canvas = document.getElementById("capture-canvas");
@@ -154,9 +202,8 @@ function captureFinalSnapshot() {
     saveAutomatedWinner(snapshotBase64);
 }
 
-// Insere no ranking usando ID automatizado incremental
 function saveAutomatedWinner(photoData) {
-    const fallbackAvatar = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='%234ade80'/><text x='50%' y='65%' font-family='sans-serif' font-size='10' fill='white' text-anchor='middle'>⭐</text></svg>`;
+    const fallbackAvatar = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='55' height='55' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='%2300ff87'/><text x='50%' y='65%' font-family='sans-serif' font-size='10' fill='black' text-anchor='middle'>⭐</text></svg>`;
     const localRecords = JSON.parse(localStorage.getItem("pro_players_db")) || [];
     
     const currentNumber = localRecords.length + 1;
@@ -175,25 +222,37 @@ function saveAutomatedWinner(photoData) {
     }
 
     localStorage.setItem("pro_players_db", JSON.stringify(localRecords));
-    displayLeaderboard();
+    
+    // Atualiza estruturas de visualização globais
+    displayLeaderboard("leaderboard-list-main");
 
-    // Aguarda 3 segundos exibindo a foto no ranking e retorna para o início automaticamente
+    // Aguarda exibição da vitória por 3s antes de retornar à estaca zero
     setTimeout(() => {
-        document.getElementById("victory-screen").classList.add("hidden");
-        document.getElementById("loading-screen").classList.remove("hidden");
-        closeWebcam();
+        returnToMenu();
     }, 3000);
 }
 
-// Alimenta o ranking
-function displayLeaderboard() {
-    const container = document.getElementById("leaderboard-list");
-    const localRecords = JSON.parse(localStorage.getItem("pro_players_db")) || [];
+function returnToMenu() {
+    executionState = "INTRO";
+    closeWebcam();
+    document.getElementById("gameover-screen").classList.add("hidden");
+    document.getElementById("victory-screen").classList.add("hidden");
+    document.getElementById("quiz-screen").classList.add("hidden");
+    document.getElementById("loading-screen").classList.remove("hidden");
+    document.getElementById("leaderboard-section").classList.remove("hidden");
+    displayLeaderboard("leaderboard-list-main");
+}
 
+// Popula o container especificado via parâmetro estrutural (Normal ou Tela cheia)
+function displayLeaderboard(targetContainerId) {
+    const container = document.getElementById(targetContainerId);
+    if (!container) return;
+    
+    const localRecords = JSON.parse(localStorage.getItem("pro_players_db")) || [];
     container.innerHTML = "";
 
     if (localRecords.length === 0) {
-        container.innerHTML = `<p style="grid-column: span 2; color: #64748b;">Nenhum campeão registrado ainda nesta máquina.</p>`;
+        container.innerHTML = `<p style="grid-column: span 2; color: #64748b; text-align: center; width: 100%;">Nenhum campeão registrado ainda nesta máquina.</p>`;
         return;
     }
 
@@ -219,5 +278,5 @@ function closeWebcam() {
 }
 
 window.onload = function() {
-    displayLeaderboard();
+    displayLeaderboard("leaderboard-list-main");
 };
